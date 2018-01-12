@@ -109,8 +109,10 @@ public:
     QByteArray get_rst()
     {
         QByteArray ba;
+        ba.clear();
         d.lock.lock();
         ba=d.rst;
+        d.rst.clear();
         d.lock.unlock();
         return ba;
     }
@@ -169,10 +171,10 @@ public:
         ba=cameras[index]->get_rst();
         if(ba.length()){
             ret= true;
-            prt(output_data,"sending cam %d rst",index);
+            prt(debug,"sending cam %d rst",index);
         }else{
             ret= false;
-            prt(error,"sending cam %d rst error",index);
+            prt(warning,"sending cam %d rst error",index);
         }
         cfg_lock.unlock();
         return ret;

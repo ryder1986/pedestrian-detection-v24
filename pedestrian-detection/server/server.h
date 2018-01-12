@@ -152,7 +152,7 @@ public slots:
             }
         }else{
             if(camera_focused()){
-                prt(info,"close camera %d output",focus_index);
+                prt(debug,"close camera %d output",focus_index);
                 close_output();
             }
         }
