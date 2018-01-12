@@ -14,11 +14,6 @@ class ProcessedDataSender : public QObject{
     Q_OBJECT
 
 public:
-//    static ProcessedDataSender &get_instance()
-//    {
-//        static ProcessedDataSender sender;
-//        return sender;
-//    }
     static ProcessedDataSender *get_instance()
     {
         static ProcessedDataSender sender;
@@ -26,39 +21,18 @@ public:
     }
     void send(QByteArray datagram,const QHostAddress addr)
     {
-//        QByteArray datagram;
-//        datagram.clear();
-//        datagram.append("test");
         prt(debug,"broadcast %s to port 12346",datagram.data());
         udp_skt->writeDatagram(datagram.data(), datagram.size(),
                                addr, Protocol::SERVER_DATA_OUTPUT_PORT);
     }
 private:
     ProcessedDataSender(){
-     //   timer=new QTimer();
-      //  connect(timer,SIGNAL(timeout()),this,SLOT(check_client()));//TODO:maybe replace with readReady signal
         udp_skt = new QUdpSocket();
-     //   udp_skt->bind(Protocol::SERVER_DATA_OUTPUT_PORT,QUdpSocket::ShareAddress);
-        // timer->start(1000);
     }
     ~ProcessedDataSender()
     {
-     //   disconnect(timer);
-      //  delete timer;
         delete udp_skt;
     }
-
-//    void start()
-//    {
-//        timer->start(1000);
-//    }
-
-//    void stop()
-//    {
-//        timer->stop();
-//    }
-
-
 
 public  slots:
     void check_client()

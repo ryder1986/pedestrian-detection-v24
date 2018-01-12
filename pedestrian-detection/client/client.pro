@@ -35,9 +35,9 @@ INSTALLS+=install_setting
 message(build $$TARGET on win32)
 install_setting.path=$$OUT_PWD/install
     CONFIG(debug, debug|release){
-        install_setting.files=$$OUT_PWD/debug/client.exe  config.json
+        install_setting.files=$$OUT_PWD/debug/client.exe  config.json run-client.sh
     }else{
-        install_setting.files=$$OUT_PWD/release/client.exe  config.json
+        install_setting.files=$$OUT_PWD/release/client.exe  config.json run-client.sh
     }
 INSTALLS=install_setting
 message(install ($$install_setting.files) in ($$install_setting.path))

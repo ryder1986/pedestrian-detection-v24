@@ -38,9 +38,9 @@ INSTALLS+=install_setting
 message(build $$TARGET on win32)
 install_setting.path=$$OUT_PWD/install
     CONFIG(debug, debug|release){
-        install_setting.files=$$OUT_PWD/debug/server.exe  config.json run.sh hogcascade_pedestrians.xml
+        install_setting.files=$$OUT_PWD/debug/server.exe  config.json run-server.sh hogcascade_pedestrians.xml
     }else{
-        install_setting.files=$$OUT_PWD/release/server.exe  config.json run.sh hogcascade_pedestrians.xml
+        install_setting.files=$$OUT_PWD/release/server.exe  config.json run-server.sh hogcascade_pedestrians.xml
     }
 INSTALLS=install_setting
 message(install ($$install_setting.files) in ($$install_setting.path))
