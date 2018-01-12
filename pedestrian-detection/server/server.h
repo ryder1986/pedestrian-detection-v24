@@ -167,17 +167,17 @@ public slots:
 
         int writes_num=0;
         QByteArray client_buf=skt->readAll();
-        prt(info,"server get %d bytes",client_buf.size());
+        prt(debug,"server get %d bytes",client_buf.size());
         rcv_buf=client_buf.data();
 
         int ret_size=process(rcv_buf,send_buf,client_buf.size());
         writes_num=skt->write(send_buf,ret_size);
-        prt(info,"server reply %d bytes",writes_num);
+        prt(debug,"server reply %d bytes",writes_num);
     }
     int process(char *src_buf,char*dst_buf,int size)
     {
         CameraManager &mgr=CameraManager::GetInstance();
-        prt(debug,"handle client %s cmd",ip().toStdString().data());
+        prt(debug,"handle client %s msg",ip().toStdString().data());
         int client_cmd=Protocol::get_operation(src_buf);
         int pkg_len=Protocol::get_length(src_buf);
         int cam_index=Protocol::get_cam_index(src_buf);
@@ -188,7 +188,7 @@ public slots:
         switch (client_cmd) {
         case Protocol::ADD_CAMERA:
 
-            prt(info,"client %s request add camera",ip().toStdString().data());
+            prt(info,"adding camera(client %s) ",ip().toStdString().data());
             bta.clear();
             bta.append(src_buf+Protocol::HEAD_LENGTH,pkg_len);
             mgr.add_camera(bta.data());
@@ -322,26 +322,24 @@ public slots:
     void handle_session_op(int req,void *addr,int &reply)
     {
         int idx=clients.indexOf((ClientSession *)addr);
-            prt(info,"client %d msg",idx);
+            prt(debug,"client %d msg",idx);
         switch(req){
         case SESSION_REQUEST::TRY_TO_WRITE:
-            prt(info,"client wirte request");
+            prt(debug,"client wirte request");
             break;
         case SESSION_REQUEST::TRY_TO_READ:
-              prt(info,"client read request");
-
+            prt(debug,"client read request");
             break;
         case SESSION_REQUEST::READ_DONE:
-              prt(info,"client read done");
-
+            prt(debug,"client read done");
             break;
         case SESSION_REQUEST::WRITE_DONE:
-              prt(info,"client wirte done");
-              foreach (ClientSession *s, clients) {
-                  if(addr!=s){
-                      s->update_client();
-                  }
-              }
+            prt(debug,"client wirte done");
+            foreach (ClientSession *s, clients) {
+                if(addr!=s){
+                    s->update_client();
+                }
+            }
             break;
         default:
             break;
