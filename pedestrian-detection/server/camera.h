@@ -37,7 +37,7 @@ public:
         bool ret;
         p_data->p_src=new VideoSrc(p_data->url.toStdString().data());
         p_data->p_worker=new VideoProcessor;
-      //  p_data->sender=  new ProcessedDataSender;
+        //  p_data->sender=  new ProcessedDataSender;
         QByteArray rst;
         string str;
         while(!p_data->quit)
@@ -47,10 +47,10 @@ public:
             ret=p_data->p_src->fetch_frame(mt);
             if(ret){
                 rst.clear();
-             //   p_data->p_worker->work_inside(mt,rst,p_data->url);
-              //  p_data->p_worker->work_inside(mt,str);
+                //   p_data->p_worker->work_inside(mt,rst,p_data->url);
+                //  p_data->p_worker->work_inside(mt,str);
 
-                 //   this_thread::sleep_for(chrono::milliseconds(100));
+                //   this_thread::sleep_for(chrono::milliseconds(100));
                 //  rst.clear();rst.append(p_data->index);
                 //                if(p_data->output&&rst.length()){
                 //                    p_data->sender->send(rst);
@@ -58,11 +58,11 @@ public:
                 //
 
 
-//#if IS_UNIX
+                //#if IS_UNIX
 #if 1
-               p_data->p_worker->work(mt,str);
-                 QByteArray ss(str.data());
-                 rst=ss;
+                p_data->p_worker->work(mt,str);
+                QByteArray ss(str.data());
+                rst=ss;
 #else
                 p_data->p_worker->work_inside(mt,rst,p_data->url);
 #endif
@@ -70,13 +70,13 @@ public:
                     p_data->lock.lock();
                     p_data->rst=rst;
                     p_data->lock.unlock();
-                 }}
-                else{
-                        this_thread::sleep_for(chrono::milliseconds(30));
-                 }
-           }
+                }}
+            else{
+                this_thread::sleep_for(chrono::milliseconds(30));
+            }
+        }
         prt(info,"quit camera thread");
-     //   delete   p_data->sender;
+        //   delete   p_data->sender;
         delete p_data->p_src;
         delete p_data->p_worker;
     }

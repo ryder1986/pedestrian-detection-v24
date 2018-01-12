@@ -316,8 +316,8 @@ public slots:
         lock.unlock();
         prt(info,"state %d",tcp_socket->state());
         int op=Protocol::decode_head_op(ret_ba.data());
-        if(ret_ba.size()>0&&op==Protocol::GET_CONFIG)
-            emit server_msg(ret_ba.remove(0,Protocol::HEAD_LENGTH));
+        if(ret_ba.size()>0)
+            emit server_msg(ret_ba.remove(0,Protocol::HEAD_LENGTH),Protocol::get_operation(ret_ba.data()));
     }
 
     void connect_to_server(QString ip)
@@ -364,7 +364,7 @@ public slots:
         }
     }
 signals:
-    void server_msg(QByteArray msg);
+    void server_msg(QByteArray msg,int);
 private:
     mutex lock;
     QByteArray ret_ba;

@@ -45,10 +45,8 @@ public :
         ADD_CAMERA,
         DEL_CAMERA,
         MOD_CAMERA,
-        CAM_OUTPUT_OPEN
-       };
-    enum MSG{
-        UPDATE
+        CAM_OUTPUT_OPEN,
+        NEED_UPDATE
     };
 
     enum RET{
@@ -113,12 +111,12 @@ public :
     }
     static int decode_head_op(char *buf){
         //   pkg_set_len(ba);
-return pkg_get_op(buf);
-//        pkg_set_len(buf,0);
-//        pkg_set_version(buf,VERSION);
-//        pkg_set_op(buf,GET_CONFIG);
-//        pkg_set_ret(buf,RET_SUCCESS);
-//        return HEAD_LENGTH;
+        return pkg_get_op(buf);
+        //        pkg_set_len(buf,0);
+        //        pkg_set_version(buf,VERSION);
+        //        pkg_set_op(buf,GET_CONFIG);
+        //        pkg_set_ret(buf,RET_SUCCESS);
+        //        return HEAD_LENGTH;
     }
     static int encode_configuration_request(char *buf){
         //   pkg_set_len(ba);

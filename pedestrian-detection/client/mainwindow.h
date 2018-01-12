@@ -213,17 +213,32 @@ public slots:
         }
     }
 
-    void handle_msg(QByteArray rst)
+    void handle_msg(QByteArray rst,int cmd)
     {
-        p_cfg->set_config( rst);
-        //handle tree list
-        window->treeWidget_devices->clear();
-        p_item_device_root=new QTreeWidgetItem(QStringList(clt->server_ip));
-        window->treeWidget_devices->addTopLevelItem(p_item_device_root);
-        for(int i=0;i<p_cfg->cfg.camera_amount;i++){
-            QTreeWidgetItem *itm1=new QTreeWidgetItem(QStringList(p_cfg->cfg.camera[i].ip));
-            p_item_device_root->addChild(itm1);
+           qDebug()<<"get cmd "<<cmd;
+
+
+        switch (cmd) {
+            case Protocol::CMD::NEED_UPDATE:
+                {         QMessageBox  *message=new QMessageBox(QMessageBox::Warning,"Information","need update",QMessageBox::Yes|QMessageBox::No,NULL);
+            message->show();
+            }
+            break;
+        case Protocol::CMD::GET_CONFIG:
+            p_cfg->set_config( rst);
+            //handle tree list
+            window->treeWidget_devices->clear();
+            p_item_device_root=new QTreeWidgetItem(QStringList(clt->server_ip));
+            window->treeWidget_devices->addTopLevelItem(p_item_device_root);
+            for(int i=0;i<p_cfg->cfg.camera_amount;i++){
+                QTreeWidgetItem *itm1=new QTreeWidgetItem(QStringList(p_cfg->cfg.camera[i].ip));
+                p_item_device_root->addChild(itm1);
+            }
+            break;
+        default:
+            break;
         }
+
     }
 
 private:

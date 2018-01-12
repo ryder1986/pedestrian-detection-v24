@@ -100,7 +100,7 @@ class ClientSession:public QObject{
     Q_OBJECT
 public:
     ClientSession(QTcpSocket *client_skt):skt(client_skt),focus_index(0){
-
+        need_sync=true;
         connect(skt,SIGNAL(readyRead()),this,SLOT(handle_msg()));
         connect(skt,SIGNAL(disconnected()),this,SLOT(deleteLater()));
         connect(skt,SIGNAL(error(QAbstractSocket::SocketError)),this,SLOT(socket_error()));
@@ -184,20 +184,24 @@ public slots:
 
         QByteArray bta;
         int ret_size=0;
-            int rpl;
+        int rpl;
         switch (client_cmd) {
         case Protocol::ADD_CAMERA:
-
-            prt(info,"adding camera(client %s) ",ip().toStdString().data());
-            bta.clear();
-            bta.append(src_buf+Protocol::HEAD_LENGTH,pkg_len);
-            mgr.add_camera(bta.data());
-            memcpy(dst_buf,src_buf,size);
-            ret_size= Protocol::HEAD_LENGTH;
-            emit session_operation(SESSION_REQUEST::WRITE_DONE,this,rpl);
+            if(need_sync){
+                prt(warning,"omit adding camera(client %s),need sync ",ip().toStdString().data());
+                update_client();
+            }else{
+                prt(info,"adding camera(client %s) ",ip().toStdString().data());
+                bta.clear();
+                bta.append(src_buf+Protocol::HEAD_LENGTH,pkg_len);
+                mgr.add_camera(bta.data());
+                memcpy(dst_buf,src_buf,size);
+                ret_size= Protocol::HEAD_LENGTH;
+                emit session_operation(SESSION_REQUEST::WRITE_DONE,this,rpl);
+            }
             break;
         case  Protocol::GET_CONFIG:
-
+            need_sync=false;
             emit session_operation(SESSION_REQUEST::TRY_TO_READ,this,rpl);
             prt(info,"client %s request fetch configuration",ip().toStdString().data());
             memcpy(dst_buf,src_buf,Protocol::HEAD_LENGTH);
@@ -207,22 +211,37 @@ public slots:
 
             break;
         case Protocol::DEL_CAMERA:
-            prt(info,"client %s request delete camera %d",ip().toStdString().data(),cam_index);
-            mgr.del_camera(cam_index);
-            memcpy(dst_buf,src_buf,Protocol::HEAD_LENGTH);
-            ret_size= Protocol::HEAD_LENGTH;
-            emit session_operation(SESSION_REQUEST::WRITE_DONE,this,rpl);
+            if(need_sync){
+                prt(warning,"omit adding camera(client %s),need sync ",ip().toStdString().data());
+                update_client();
+            }else{
+                prt(info,"client %s request delete camera %d",ip().toStdString().data(),cam_index);
+                mgr.del_camera(cam_index);
+                memcpy(dst_buf,src_buf,Protocol::HEAD_LENGTH);
+                ret_size= Protocol::HEAD_LENGTH;
+                emit session_operation(SESSION_REQUEST::WRITE_DONE,this,rpl);
+            }
             break;
         case Protocol::MOD_CAMERA:
-            prt(info,"modify cam %d ",cam_index);
-            emit session_operation(SESSION_REQUEST::WRITE_DONE,this,rpl);
+            if(need_sync){
+                prt(warning,"omit adding camera(client %s),need sync ",ip().toStdString().data());
+                update_client();
+            }else{
+                prt(info,"modify cam %d ",cam_index);
+                emit session_operation(SESSION_REQUEST::WRITE_DONE,this,rpl);
+            }
             break;
         case Protocol::CAM_OUTPUT_OPEN:
-            prt(info,"client %s request camera %d output data",ip().toStdString().data(),cam_index);
-            memcpy(dst_buf,src_buf,Protocol::HEAD_LENGTH);
-            ret_size= Protocol::HEAD_LENGTH;
-            //  focus_index=cam_index;
-            open_output(cam_index);
+            if(need_sync){
+                prt(warning,"omit adding camera(client %s),need sync ",ip().toStdString().data());
+                update_client();
+            }else{
+                prt(info,"client %s request camera %d output data",ip().toStdString().data(),cam_index);
+                memcpy(dst_buf,src_buf,Protocol::HEAD_LENGTH);
+                ret_size= Protocol::HEAD_LENGTH;
+                //  focus_index=cam_index;
+                open_output(cam_index);
+            }
             //mgr.set_output(cam_index);
             break;
         default:
@@ -232,9 +251,10 @@ public slots:
     }
     void update_client()
     {
-      char bf[Pd::BUFFER_LENGTH];
-      Protocol::encode_msg(bf,Protocol::MSG::UPDATE);
-      int writes_num=skt->write(bf,Protocol::HEAD_LENGTH);
+        char bf[Pd::BUFFER_LENGTH];
+        Protocol::encode_msg(bf,Protocol::CMD::NEED_UPDATE);
+        int writes_num=skt->write(bf,Protocol::HEAD_LENGTH);
+        need_sync=true;
     }
 
     void displayError(QAbstractSocket::SocketError socketError)
@@ -270,6 +290,7 @@ private:
     QTimer *timer;
     QHostAddress client_addr;
     int focus_index;
+    bool need_sync;
 };
 /*
     server provide
@@ -314,7 +335,7 @@ public slots:
         prt(info,"client %s:%d connected",str.toStdString().data(),skt->peerPort());
         ClientSession *client=new ClientSession(skt);
         connect(client,SIGNAL(socket_error(ClientSession*)),this,SLOT(delete_client(ClientSession*)));
-        connect(client,SIGNAL(session_operation(int,void*,int&)),this,SLOT(handle_session_op(int,void*,int&)),Qt::DirectConnection);
+        connect(client,SIGNAL(session_operation(int,void*,int&)),this,SLOT(handle_session_op(int,void*,int&)),Qt::DirectConnection);//important,in case of competition bugs
         connect(skt,SIGNAL(error(QAbstractSocket::SocketError)),this,SLOT(displayError(QAbstractSocket::SocketError)));
 
         clients.append(client);
@@ -322,7 +343,7 @@ public slots:
     void handle_session_op(int req,void *addr,int &reply)
     {
         int idx=clients.indexOf((ClientSession *)addr);
-            prt(debug,"client %d msg",idx);
+        prt(debug,"client %d msg",idx);
         switch(req){
         case SESSION_REQUEST::TRY_TO_WRITE:
             prt(debug,"client wirte request");
