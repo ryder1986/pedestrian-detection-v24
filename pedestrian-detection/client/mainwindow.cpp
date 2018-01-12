@@ -14,6 +14,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(search_widget,SIGNAL(select_ip(QString)),this,SLOT(connect_server(QString)),Qt::QueuedConnection);
     connect(searcher,SIGNAL(find_ip(QString)),search_widget,SLOT(add_text(QString)),Qt::QueuedConnection);
     connect(clt,SIGNAL(server_msg(QByteArray,int )),this,SLOT(handle_msg(QByteArray,int )),Qt::QueuedConnection);
+    box1=new QMessageBox(QMessageBox::Warning,"Information","update?",QMessageBox::Yes|QMessageBox::No,NULL);
+    connect(box1,SIGNAL(accepted()),this,SLOT(clear_server_dialog()));
 }
 
 MainWindow::~MainWindow()

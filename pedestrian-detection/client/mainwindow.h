@@ -11,7 +11,7 @@
 #include "searchwidget.h"
 using namespace std ;
 class VideoThread:public QObject{
-Q_OBJECT
+    Q_OBJECT
     typedef struct data{
         VideoSrc *p_src;
         QString url;
@@ -34,9 +34,9 @@ private:
             if(flg){
                 p_data->lock.lock();
                 if(p_data->rst.size()>0)
-                     p_data->video_render->set_rects(p_data->rst);
-                   p_data->rst.clear();
-                   p_data->lock.unlock();
+                    p_data->video_render->set_rects(p_data->rst);
+                p_data->rst.clear();
+                p_data->lock.unlock();
                 p_data->video_render->update_mat(mt);
 
             }
@@ -79,7 +79,7 @@ public slots:
             QRect r;
             r.setRect(l[0].toInt(),l[1].toInt(),l[2].toInt(),l[3].toInt());
 
-           // prt(info,"#### %s",l[0].toStdString().data());
+            // prt(info,"#### %s",l[0].toStdString().data());
         }
 #endif
     }
@@ -116,7 +116,7 @@ private slots:
     void del_camera(bool checked)
     {
         if(p_video_thread)
-         {
+        {
 
             delete p_video_thread;
             p_video_thread=NULL;
@@ -142,15 +142,15 @@ private slots:
             int size = p_cfg->cfg.camera_amount;
             if(del_index<=size&&del_index>0)
             {
-              #if 0
-                      char buf[2000];
+#if 0
+                char buf[2000];
                 //cam_manager->del_camera(del_index);// delete camera local
                 p_cfg->del_camera(del_index);
                 Protocol::encode_delcam_request(buf,del_index);//encode buffer
                 clt->call_server(buf,Protocol::HEAD_LENGTH);//talk to server
-            #else
+#else
                 submit_camera_deling(del_index);
-            #endif
+#endif
             }
             p_item_device_root->removeChild(p_item_device_current);
 
@@ -171,7 +171,7 @@ private slots:
     }
     void submit_camera_deling(int del_index)
     {
-         char buf[2000];
+        char buf[2000];
         p_cfg->del_camera(del_index);
         Protocol::encode_delcam_request(buf,del_index);//encode buffer
         clt->call_server(buf,Protocol::HEAD_LENGTH);//talk to server
@@ -215,14 +215,18 @@ public slots:
 
     void handle_msg(QByteArray rst,int cmd)
     {
-           qDebug()<<"get cmd "<<cmd;
+        qDebug()<<"get cmd "<<cmd;
 
 
         switch (cmd) {
-            case Protocol::CMD::NEED_UPDATE:
-                {         QMessageBox  *message=new QMessageBox(QMessageBox::Warning,"Information","need update",QMessageBox::Yes|QMessageBox::No,NULL);
-            message->show();
-            }
+        case Protocol::CMD::NEED_UPDATE:
+        {
+//            QMessageBox  *message=new QMessageBox(QMessageBox::Warning,"Information","update?",QMessageBox::Yes|QMessageBox::No,NULL);
+//            connect(message,SIGNAL(accepted()),this,SLOT(clear_server_dialog()));
+//            message->show();
+            box1->show();
+           // window->treeWidget_devices->clear();
+        }
             break;
         case Protocol::CMD::GET_CONFIG:
             p_cfg->set_config( rst);
@@ -240,6 +244,11 @@ public slots:
         }
 
     }
+    void clear_server_dialog()
+    {
+        qDebug()<<"clear info";
+        window->treeWidget_devices->clear();
+    }
 
 private:
     Ui::Form *window;
@@ -252,6 +261,7 @@ private:
     int selected_camera_index;
     VideoThread *p_video_thread;
     SearchWidget *search_widget;
+    QMessageBox  *box1;
 
 };
 
